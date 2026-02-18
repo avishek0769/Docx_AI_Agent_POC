@@ -46,6 +46,33 @@ export const CKEditorDemo = ({ setEditor }) => {
 
     const { FormatPainter } = cloud.CKEditorPremiumFeatures;
 
+    function MyUploadAdapter(loader) {
+        this.loader = loader;
+    }
+
+    MyUploadAdapter.prototype.upload = function () {
+        return this.loader.file.then(file => {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                fetch('http://localhost:3000/api/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    resolve({
+                        default: data.url
+                    });
+                })
+                .catch(error => {
+                    reject(error);
+                });
+            });
+        });
+    };
+
     return (
         <CKEditor
             editor={ClassicEditor}
@@ -88,7 +115,12 @@ export const CKEditorDemo = ({ setEditor }) => {
                     'insertTable', 'imageUpload',
                     '|',
                     'formatPainter',
-                ]
+                ],
+                extraPlugins: [function (editor) {
+                    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+                        return new MyUploadAdapter(loader);
+                    }
+                }]
             }}
             onReady={(editor) => {
                 // editor.execute("")
