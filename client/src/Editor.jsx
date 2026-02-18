@@ -164,7 +164,12 @@ export const CKEditorDemo = ({ setEditor }) => {
 
             }}
             onReady={(editor) => {
-                // editor.execute("")
+                // editor.model.change(writer => {
+                //     const root = editor.model.document.getRoot()
+                //     console.log(root.getChildren())
+                //     const range = writer.createRangeIn(root)
+                //     console.log(range)
+                // })
                 setEditor(editor);
             }}
         />

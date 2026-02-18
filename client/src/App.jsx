@@ -5,7 +5,11 @@ import { useEffect } from 'react'
 function App() {
     const [editor, setEditor] = useState(null)
     useEffect(() => {
-        console.log(editor?.getData())
+        if (editor) {
+            console.log(editor?.getData())
+            editor.execute('bold');
+        }
+
     }, [editor])
 
     return (
@@ -13,35 +17,61 @@ function App() {
             <div className='flex'>
                 <div className='w-[70%]'>
                     <CKEditorDemo setEditor={setEditor} />
-                    <button onClick={() => editor && console.log(editor.getData())}>
-                        Get data
-                    </button>
-                    <button onClick={() => editor.setData(`
-                        <h1>Heading 1 - Main Title</h1>
-                        <h2>Heading 2 - Section Title</h2>
-                        <h3>Heading 3 - Subsection</h3>
-                        <h4>Heading 4</h4>
-                        <h5>Heading 5</h5>
-                        <h6>Heading 6</h6>
+                    <div className='flex gap-4'>
+                        <button onClick={() => editor && console.log(editor.getData())}>
+                            Get data
+                        </button>
+                        <button onClick={() => editor && editor.execute('bold')}>
+                            Make bold
+                        </button>
+                        <button onClick={() => {
+                            editor.model.change(writer => {
+                                const insertPosition = editor.model.document.selection.getFirstPosition();
+                                writer.insertText("Hello from code!", insertPosition);
+                            });
+                        }}>
+                            Insert text
+                        </button>
+                        <button onClick={() => {
+                            editor.model.change(writer => {
+                                const root = editor.model.document.getRoot()
+                                const paragraph = root.getChild(2)
+                                const start = writer.createPositionAt(paragraph, 5);
+                                const end = writer.createPositionAt(paragraph, 17);
+                                const range = writer.createRange(start, end);
+                                writer.setSelection(range)
+                            })
+                        }}>
+                            Selection
+                        </button>
+                        <button onClick={() => editor.setData(`
+                        <h1><span style="color:hsl(0, 75%, 60%); background-color:hsl(0, 10%, 90%);">Heading 1 – Main Title</span></h1>
 
-                        <p>
-                        This is a paragraph with <strong>bold text</strong>, 
-                        <em>italic text</em>, 
-                        <a href="#">a sample link</a>, 
-                        and some <code>inline code</code>.
+                        <h2 style="color:#1f2937;">Heading 2 – Section Title</h2>
+                        <h3 style="color:#374151;">Heading 3 – Subsection</h3>
+                        <h4 style="color:#4b5563;">Heading 4</h4>
+                        <h5 style="color:#6b7280;">Heading 5</h5>
+                        <h6 style="color:#9ca3af;">Heading 6</h6>
+
+                        <p style="background:#f9fafb; padding:12px; border-radius:6px;">
+                        This is a paragraph with
+                        <strong style="color:#111827;">bold text</strong>,
+                        <em style="color:#374151;">italic text</em>,
+                        <a href="#" style="color:#2563eb; font-weight:500;">a sample link</a>,
+                        and some <code style="background:#e5e7eb; padding:2px 6px;">inline code</code>.
                         </p>
 
-                        <hr />
+                        <hr style="border-top:2px dashed #d1d5db; margin:24px 0;" />
 
                         <h2>Lists Test</h2>
 
-                        <ul>
+                        <ul style="background:#f9fafb; padding:16px; border-radius:6px;">
                         <li>Unordered item one</li>
                         <li>Unordered item two</li>
                         <li>Unordered item three</li>
                         </ul>
 
-                        <ol>
+                        <ol style="background:#f3f4f6; padding:16px; border-radius:6px;">
                         <li>Ordered item one</li>
                         <li>Ordered item two</li>
                         <li>Ordered item three</li>
@@ -49,49 +79,80 @@ function App() {
 
                         <h2>Blockquote Test</h2>
 
-                        <blockquote>
-                        This is a blockquote. It should have a left border,
-                        background color, and italic text.
+                        <blockquote
+                        style="
+                            border-left:5px solid #3b82f6;
+                            background:#eff6ff;
+                            padding:16px;
+                            border-radius:6px;
+                        "
+                        >
+                        This is a blockquote. It should visually stand out with
+                        a blue border and background.
                         </blockquote>
 
                         <h2>Image Test</h2>
 
-                        <img width="200px" height="100px" src="https://images.pexels.com/photos/440731/pexels-photo-440731.jpeg" alt="Sample Image" />
+                        <img
+                        src="https://via.placeholder.com/600x300"
+                        alt="Sample Image"
+                        style="border-radius:8px; box-shadow:0 10px 20px rgba(0,0,0,0.1);"
+                        />
 
-                        <figure>
-                        <img  src="https://via.placeholder.com/500x250" alt="Figure Image" />
-                        <figcaption>This is a caption below the image.</figcaption>
+                        <figure
+                        style="
+                            background:#f9fafb;
+                            padding:12px;
+                            border-radius:8px;
+                        "
+                        >
+                        <img
+                            src="https://via.placeholder.com/500x250"
+                            alt="Figure Image"
+                            style="border-radius:6px;"
+                        />
+                        <figcaption style="text-align:center; color:#6b7280;">
+                            This is a caption below the image.
+                        </figcaption>
                         </figure>
 
                         <h2>Table Test</h2>
 
-                        <table>
+                        <table style="border:2px solid #d1d5db;">
                         <thead>
-                            <tr>
-                            <th>Column One</th>
-                            <th>Column Two</th>
-                            <th>Column Three</th>
+                            <tr style="background:#e5e7eb;">
+                            <th style="padding:10px;">Column One</th>
+                            <th style="padding:10px;">Column Two</th>
+                            <th style="padding:10px;">Column Three</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                            <td>Row 1 Data 1</td>
-                            <td>Row 1 Data 2</td>
-                            <td>Row 1 Data 3</td>
+                            <td style="padding:10px;">Row 1 Data 1</td>
+                            <td style="padding:10px;">Row 1 Data 2</td>
+                            <td style="padding:10px;">Row 1 Data 3</td>
                             </tr>
-                            <tr>
-                            <td>Row 2 Data 1</td>
-                            <td>Row 2 Data 2</td>
-                            <td>Row 2 Data 3</td>
+                            <tr style="background:#f9fafb;">
+                            <td style="padding:10px;">Row 2 Data 1</td>
+                            <td style="padding:10px;">Row 2 Data 2</td>
+                            <td style="padding:10px;">Row 2 Data 3</td>
                             </tr>
                         </tbody>
                         </table>
 
                         <h2>Code Block Test</h2>
 
-                        <pre><code>
+                        <pre
+                        style="
+                            background:#111827;
+                            color:#f9fafb;
+                            padding:16px;
+                            border-radius:8px;
+                            overflow-x:auto;
+                        "
+                        ><code>
                         function greet(name) {
-                        return Hello, name;
+                        return Hello, ${name}!;
                         }
 
                         console.log(greet("World"));
@@ -99,20 +160,24 @@ function App() {
 
                         <h2>Alignment Test</h2>
 
-                        <p class="text-left">This text should be left aligned.</p>
-                        <p class="text-center">This text should be center aligned.</p>
-                        <p class="text-right">This text should be right aligned.</p>
-                        <p class="text-justify">
-                        This paragraph should be justified. It contains enough text to clearly show the justification effect across multiple lines inside the content container.
+                        <p style="text-align:left;">This text should be left aligned.</p>
+                        <p style="text-align:center;">This text should be center aligned.</p>
+                        <p style="text-align:right;">This text should be right aligned.</p>
+
+                        <p style="text-align:justify;">
+                        This paragraph should be justified. It contains enough text to
+                        clearly show justification across multiple lines inside the editor.
                         </p>
 
+
                     `)
-                    }>
-                        set data
-                    </button>
+                        }>
+                            set data
+                        </button>
+                    </div>
                 </div>
                 <div className='bg-red-100'>
-                    1
+                    <input type="text" className='border outline-0' placeholder='Ask....' />
                 </div>
             </div>
         </>
