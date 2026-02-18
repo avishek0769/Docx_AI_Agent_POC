@@ -1,6 +1,7 @@
 import { CKEditor, useCKEditorCloud } from '@ckeditor/ckeditor5-react';
 import { LICENSE_KEY } from '../constant';
 
+
 export const CKEditorDemo = ({ setEditor }) => {
     const cloud = useCKEditorCloud({
         version: '47.5.0',
@@ -41,10 +42,10 @@ export const CKEditorDemo = ({ setEditor }) => {
         Image,
         ImageToolbar,
         ImageUpload,
-        LinkEditing, PictureEditing,
+        PictureEditing, CloudServices
     } = cloud.CKEditor;
 
-    const { FormatPainter } = cloud.CKEditorPremiumFeatures;
+    const { FormatPainter, ExportPdf, ExportWord } = cloud.CKEditorPremiumFeatures;
 
     function MyUploadAdapter(loader) {
         this.loader = loader;
@@ -60,15 +61,15 @@ export const CKEditorDemo = ({ setEditor }) => {
                     method: 'POST',
                     body: formData
                 })
-                .then(response => response.json())
-                .then(data => {
-                    resolve({
-                        default: data.url
+                    .then(response => response.json())
+                    .then(data => {
+                        resolve({
+                            default: data.url
+                        });
+                    })
+                    .catch(error => {
+                        reject(error);
                     });
-                })
-                .catch(error => {
-                    reject(error);
-                });
             });
         });
     };
@@ -76,7 +77,7 @@ export const CKEditorDemo = ({ setEditor }) => {
     return (
         <CKEditor
             editor={ClassicEditor}
-            data={'<p>Hello world!</p>'}
+            data={'<h1>Hello world!</h1>'}
             config={{
                 licenseKey: LICENSE_KEY,
                 plugins: [
@@ -91,8 +92,8 @@ export const CKEditorDemo = ({ setEditor }) => {
                     Indent, IndentBlock,
                     BlockQuote,
                     Table, TableToolbar,
-                    Image, ImageToolbar, LinkEditing, PictureEditing, ImageUpload,
-                    FormatPainter
+                    Image, ImageToolbar, PictureEditing, ImageUpload,
+                    FormatPainter, ExportPdf, ExportWord, CloudServices
                 ],
                 toolbar: [
                     'undo', 'redo',
@@ -115,12 +116,52 @@ export const CKEditorDemo = ({ setEditor }) => {
                     'insertTable', 'imageUpload',
                     '|',
                     'formatPainter',
+                    '|',
+                    'exportPdf',
+                    'exportWord'
                 ],
                 extraPlugins: [function (editor) {
                     editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
                         return new MyUploadAdapter(loader);
                     }
-                }]
+                }],
+                exportPdf: {
+                    stylesheets: [
+                        '/styles.css'
+                    ],
+                    fileName: 'document.pdf'
+                },
+                exportWord: {
+                    fileName: 'document.docx'
+                },
+                heading: {
+                    options: [
+                        {
+                            model: 'paragraph',
+                            title: 'Paragraph',
+                            class: 'ck-heading_paragraph'
+                        },
+                        {
+                            model: 'heading1',
+                            view: 'h1',
+                            title: 'Heading 1',
+                            class: 'ck-heading_heading1'
+                        },
+                        {
+                            model: 'heading2',
+                            view: 'h2',
+                            title: 'Heading 2',
+                            class: 'ck-heading_heading2'
+                        },
+                        {
+                            model: 'heading3',
+                            view: 'h3',
+                            title: 'Heading 3',
+                            class: 'ck-heading_heading3'
+                        }
+                    ]
+                },
+
             }}
             onReady={(editor) => {
                 // editor.execute("")
