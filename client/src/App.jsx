@@ -6,8 +6,7 @@ function App() {
     const [editor, setEditor] = useState(null)
     useEffect(() => {
         if (editor) {
-            console.log(editor?.getData())
-            editor.execute('bold');
+            
         }
 
     }, [editor])
@@ -36,6 +35,7 @@ function App() {
                             editor.model.change(writer => {
                                 const root = editor.model.document.getRoot()
                                 const paragraph = root.getChild(2)
+                                console.log(paragraph)
                                 const start = writer.createPositionAt(paragraph, 5);
                                 const end = writer.createPositionAt(paragraph, 17);
                                 const range = writer.createRange(start, end);
@@ -43,6 +43,27 @@ function App() {
                             })
                         }}>
                             Selection
+                        </button>
+                        {/* It simulates receiving a response from the server with new data to update the editor content and selection. */}
+                        <button onClick={() => {
+                            editor.model.change(writer => {
+                                const root = editor.model.document.getRoot()
+                                console.log(Array.from(root.getChildren()).length)
+                                const paragraph = root.getChild(3)
+
+                                const start = writer.createPositionAt(paragraph, 2);
+                                const end = writer.createPositionAt(paragraph, 4);
+                                const range = writer.createRange(start, end);
+                                const insertPosition = writer.createPositionAt(start);
+
+                                writer.remove(range);
+                                const viewFragment = editor.data.processor.toView('<strong>New HTML</strong><div>HELLOO</div>');
+                                const modelFragment = editor.data.toModel(viewFragment);
+
+                                editor.model.insertContent(modelFragment, insertPosition);
+                            });
+                        }}>
+                            Update Selected
                         </button>
                         <button onClick={() => editor.setData(`
                         <h1><span style="color:hsl(0, 75%, 60%); background-color:hsl(0, 10%, 90%);">Heading 1 – Main Title</span></h1>
@@ -177,7 +198,23 @@ function App() {
                     </div>
                 </div>
                 <div className='bg-red-100'>
-                    <input type="text" className='border outline-0' placeholder='Ask....' />
+                    <input type="text" className='border outline-0' placeholder='Write prompt' />
+                    <button onClick={() => {
+                        fetch("http://localhost:3000/api/ask", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                editorData: editor.getData(),
+                                prompt: document.querySelector("input").value
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            console.log(data)
+                        })
+                    }} className='bg-blue-500 text-white px-4 py-2 rounded'>Ask</button>
                 </div>
             </div>
         </>

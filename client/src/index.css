@@ -206,3 +206,11 @@
 .ck-content h6 {
   line-height: 1.3;
 }
+
+.ck-content * {
+  font-family: revert;
+}
+
+.ck-content * {
+  line-height: revert;
+}
